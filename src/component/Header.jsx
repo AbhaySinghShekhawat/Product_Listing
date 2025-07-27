@@ -7,17 +7,17 @@ import { MainContext } from "./Context";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const cartItemCount = 3;
   const { cart } = useContext(MainContext);
 
   return (
-    <nav className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-      <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-3">
-          <img src={img} className="h-8 sm:h-10" alt="Logo" />
-        </Link>
+    <nav className="bg-white border-gray-200 dark:bg-gray-900">
+      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <a href="#" className="flex items-center space-x-3">
+          <img src={img} className="h-8" alt="Logo" />
+        </a>
 
-        {/* Mobile Toggle Button */}
+        {/* Toggle Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           type="button"
@@ -58,31 +58,24 @@ export default function Header() {
           } w-full md:block md:w-auto`}
           id="navbar-default"
         >
-          <ul className="flex flex-col md:flex-row md:space-x-8 p-4 md:p-0 mt-4 md:mt-0 text-gray-900 bg-gray-50 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent border rounded-lg md:border-0">
-            {/* Categories Link */}
+          <ul className="flex flex-col md:flex-row md:space-x-8 p-4 md:p-0 mt-4 md:mt-0 text-white bg-gray-50 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 border rounded-lg md:border-0">
             <li
-              className={`block py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white transition text-center md:text-left ${
-                location.pathname === "/listing"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-900 dark:text-white"
+              className={`block py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white ${
+                location.pathname === "/listing" ? "bg-blue-500 text-white" : ""
               }`}
             >
               <Link to="/listing">Categories</Link>
             </li>
 
-            {/* Cart Link */}
             <li
-              className={`relative flex justify-center md:justify-start rounded-md hover:bg-blue-500 hover:text-white transition ${
-                location.pathname === "/cart"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-900 dark:text-white"
+              className={`relative  rounded-md hover:bg-blue-500 hover:text-white ${
+                location.pathname === "/cart" ? "bg-blue-500 text-white" : ""
               }`}
             >
-              <Link to="/cart" className="block py-2 px-4">
-                <div className="relative flex items-center justify-center">
-                  {/* Cart Icon */}
+              <Link to="/cart" className="block py-2 px-4 rounded-md">
+                <div className="relative">
                   <svg
-                    className="w-6 h-6"
+                    className="w-6 h-6 text-white "
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -91,10 +84,8 @@ export default function Header() {
                   >
                     <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2 6h14M9 21h0M15 21h0" />
                   </svg>
-
-                  {/* Cart Badge */}
-                  {cart.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5">
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
                       {cart.length}
                     </span>
                   )}
