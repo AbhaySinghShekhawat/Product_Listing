@@ -7,21 +7,19 @@ import { MainContext } from "./Context";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const cartItemCount = 3;
   const { cart } = useContext(MainContext);
 
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900">
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="#" className="flex items-center space-x-3">
-          <img src={img} className="h-8" alt="Logo" />
-        </a>
+    <nav className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+      <div className="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between p-4">
+        <Link to="/" className="flex items-center space-x-3">
+          <img src={img} className="h-8 sm:h-10" alt="Logo" />
+        </Link>
 
-        {/* Toggle Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-gray-500 rounded-lg md:hidden hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="inline-flex items-center p-2 w-10 h-10 justify-center text-gray-500 rounded-lg md:hidden hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 focus:outline-none"
           aria-controls="navbar-default"
           aria-expanded={isMenuOpen}
         >
@@ -51,31 +49,39 @@ export default function Header() {
           </svg>
         </button>
 
-        {/* Navigation Links */}
         <div
           className={`${
             isMenuOpen ? "block" : "hidden"
           } w-full md:block md:w-auto`}
           id="navbar-default"
         >
-          <ul className="flex flex-col md:flex-row md:space-x-8 p-4 md:p-0 mt-4 md:mt-0 text-white bg-gray-50 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 border rounded-lg md:border-0">
+          <ul className="flex flex-col md:flex-row md:space-x-8 justify-between mt-4 md:mt-0 p-4 md:p-0 bg-gray-50 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent border md:border-0 rounded-lg md:rounded-none">
             <li
-              className={`block py-2 px-4 rounded-md hover:bg-blue-500 hover:text-white ${
-                location.pathname === "/listing" ? "bg-blue-500 text-white" : ""
-              }`}
+              className={`block px-3 py-2 rounded-md transition hover:bg-blue-500 hover:text-white 
+    ${
+      location.pathname === "/listing"
+        ? "bg-blue-500 text-white"
+        : "text-gray-900 dark:text-white"
+    }
+    w-24 h-10 flex items-center justify-center sm:w-10 sm:h-10 lg:w-full lg:h-auto md:w-full md:h-auto`}
             >
               <Link to="/listing">Categories</Link>
             </li>
 
             <li
-              className={`relative  rounded-md hover:bg-blue-500 hover:text-white ${
-                location.pathname === "/cart" ? "bg-blue-500 text-white" : ""
-              }`}
+              className={`relative block rounded-md hover:bg-blue-500 hover:text-white transition 
+    ${
+      location.pathname === "/cart"
+        ? "bg-blue-500 text-white"
+        : "text-gray-900 dark:text-white"
+    } 
+    w-14 h-10 sm:w-14 sm:h-10   md:w-20 md:h-12
+    lg:w-24 lg:h-12 flex items-center justify-center`}
             >
-              <Link to="/cart" className="block py-2 px-4 rounded-md">
-                <div className="relative">
+              <Link to="/cart" className="block w-full h-full">
+                <div className="relative flex items-center justify-center w-full h-full">
                   <svg
-                    className="w-6 h-6 text-white "
+                    className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -84,8 +90,8 @@ export default function Header() {
                   >
                     <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2 6h14M9 21h0M15 21h0" />
                   </svg>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                  {cart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5">
                       {cart.length}
                     </span>
                   )}
