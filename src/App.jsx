@@ -19,7 +19,6 @@ export default function App() {
         { path: "/listing", element: <Listing /> },
         { path: "/listing/:category_slug", element: <Listing /> },
         { path: "/details/:product_id", element: <Details /> },
-
         { path: "/cart", element: <Cart /> },
       ],
     },

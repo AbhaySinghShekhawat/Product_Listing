@@ -6,17 +6,17 @@ const MainContext = createContext();
 function Context(props) {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState(() => {
-    // Load cart from local storage when the component mounts
+    // Load cart from localStorage on mount
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever cart changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Fetch products from API
+  // Fetch all products initially (not mandatory for addtocart now)
   useEffect(() => {
     axios
       .get("https://dummyjson.com/products")
@@ -24,56 +24,82 @@ function Context(props) {
         setProducts(res.data.products);
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Error fetching products:", error);
       });
   }, []);
 
-  // Add to cart function
-  const addtocart = (id) => {
-    const existing = products.find((item) => item.id === id);
-    if (existing) {
-      const cartproduct = cart.find((cd) => cd.id === existing.id);
-      if (cartproduct) {
-        const updatecart = cart.map((prod) =>
-          prod.id === id ? { ...prod, qty: prod.qty + 1 } : prod
-        );
-        setCart(updatecart);
+  /**
+   * Add to Cart
+   * - Accepts either product object (preferred) or id (fallback).
+   * - If only id is passed, fetch product by ID.
+   */
+  const addtocart = async (item) => {
+    try {
+      let productData;
+
+      // If full product object is passed
+      if (typeof item === "object" && item.id) {
+        productData = item;
       } else {
-        setCart([...cart, { ...existing, qty: 1 }]);
+        // If ID is passed, fetch product from API
+        const res = await axios.get(`https://dummyjson.com/products/${item}`);
+        productData = res.data;
       }
+
+      // Check if product already in cart
+      const existing = cart.find((p) => p.id === productData.id);
+
+      if (existing) {
+        // Increase quantity
+        setCart(
+          cart.map((p) =>
+            p.id === productData.id ? { ...p, qty: p.qty + 1 } : p
+          )
+        );
+      } else {
+        // Add new product with qty 1
+        setCart([...cart, { ...productData, qty: 1 }]);
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
     }
   };
 
-  // Update quantity (increase/decrease)
+  /**
+   * Quantity Handler
+   * flag = 1 → increase qty (max 10)
+   * flag = 0 → decrease qty (min 1)
+   */
   const quantityhandler = (id, flag) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.map((prod) => {
-        if (prod.id === id) {
-          if (flag === 1 && prod.qty < 10) {
-            return { ...prod, qty: prod.qty + 1 };
-          } else if (flag === 0 && prod.qty > 1) {
-            return { ...prod, qty: prod.qty - 1 };
+    setCart((prevCart) =>
+      prevCart.map((item) => {
+        if (item.id === id) {
+          if (flag === 1 && item.qty < 10) {
+            return { ...item, qty: item.qty + 1 };
+          } else if (flag === 0 && item.qty > 1) {
+            return { ...item, qty: item.qty - 1 };
           }
         }
-        return prod;
-      });
-      localStorage.setItem("cart", JSON.stringify(updatedCart)); // Update local storage
-      return updatedCart;
-    });
+        return item;
+      })
+    );
   };
 
-  // Remove item from cart
+  /**
+   * Remove Item from Cart
+   */
   const removeItem = (id) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter((prod) => prod.id !== id);
-      localStorage.setItem("cart", JSON.stringify(updatedCart)); // Update local storage
-      return updatedCart;
-    });
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
   return (
     <MainContext.Provider
-      value={{ addtocart, cart, quantityhandler, removeItem }}
+      value={{
+        addtocart,
+        cart,
+        quantityhandler,
+        removeItem,
+      }}
     >
       {props.children}
     </MainContext.Provider>

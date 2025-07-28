@@ -15,6 +15,7 @@ export default function Listing() {
 
   const limits = 30;
 
+  // Fetch all categories
   const getCategory = () => {
     setLoading(true);
     axios
@@ -30,6 +31,7 @@ export default function Listing() {
       });
   };
 
+  // Fetch products when category changes
   useEffect(() => {
     let API;
     if (category_slug == null) {
@@ -53,31 +55,38 @@ export default function Listing() {
       });
   }, [category_slug]);
 
+  // Fetch products for pagination (only for "All" products)
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`https://dummyjson.com/products?skip=${pageNo * limits}`)
-      .then((res) => {
-        setProducts(res.data.products);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [pageNo]);
+    if (category_slug == null) {
+      setLoading(true);
+      axios
+        .get(`https://dummyjson.com/products?skip=${pageNo * limits}`)
+        .then((res) => {
+          setProducts(res.data.products);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [pageNo, category_slug]);
 
+  // Fetch categories once
   useEffect(() => {
     getCategory();
   }, []);
 
+  // Pagination buttons
   let pagination = [];
   for (let i = 0; i < page; i++) {
     pagination.push(
       <li
         onClick={() => setPageNo(i)}
-        className="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        className={`flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white cursor-pointer ${
+          pageNo === i ? "bg-blue-500 text-white" : ""
+        }`}
         key={i}
       >
         {i + 1}
@@ -92,14 +101,18 @@ export default function Listing() {
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-y-16 lg:gap-y-0 lg:gap-x-8">
             {/* Categories Section */}
             <div className="lg:col-span-1">
-              {/* On larger screens, show categories as a list */}
               <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                 Categories
               </h2>
 
+              {/* Categories list for large screens */}
               <ul className="space-y-2 mt-4 hidden lg:block">
                 <Link to={"/listing"}>
-                  <li className="shadow hover:bg-blue-400 hover:text-cyan-50 cursor-pointer p-1">
+                  <li
+                    className={`shadow hover:bg-blue-400 hover:text-white cursor-pointer p-1 ${
+                      !category_slug ? "bg-blue-400 text-white" : ""
+                    }`}
+                  >
                     All
                   </li>
                 </Link>
@@ -108,9 +121,9 @@ export default function Listing() {
                     <li
                       className={`${
                         category_slug === cat.slug
-                          ? "bg-blue-400 text-cyan-50"
+                          ? "bg-blue-400 text-white"
                           : ""
-                      } shadow hover:bg-blue-400 hover:text-cyan-50 cursor-pointer p-1`}
+                      } shadow hover:bg-blue-400 hover:text-white cursor-pointer p-1`}
                     >
                       {cat.name}
                     </li>
@@ -118,7 +131,7 @@ export default function Listing() {
                 ))}
               </ul>
 
-              {/* On small and medium screens, show dropdown */}
+              {/* Dropdown for small/medium screens */}
               <div className="lg:hidden mt-4">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -129,7 +142,11 @@ export default function Listing() {
                 {dropdownOpen && (
                   <ul className="mt-2 space-y-2 bg-white shadow-lg rounded-md py-2">
                     <Link to={"/listing"}>
-                      <li className="px-4 py-2 hover:bg-blue-400 hover:text-cyan-50 cursor-pointer">
+                      <li
+                        className={`px-4 py-2 hover:bg-blue-400 hover:text-white cursor-pointer ${
+                          !category_slug ? "bg-blue-400 text-white" : ""
+                        }`}
+                      >
                         All
                       </li>
                     </Link>
@@ -138,9 +155,9 @@ export default function Listing() {
                         <li
                           className={`${
                             category_slug === cat.slug
-                              ? "bg-blue-400 text-cyan-50"
+                              ? "bg-blue-400 text-white"
                               : ""
-                          } px-4 py-2 hover:bg-blue-400 hover:text-cyan-50 cursor-pointer`}
+                          } px-4 py-2 hover:bg-blue-400 hover:text-white cursor-pointer`}
                         >
                           {cat.name}
                         </li>
@@ -150,6 +167,7 @@ export default function Listing() {
                 )}
               </div>
             </div>
+
             {/* Products Section */}
             <div className="lg:col-span-5 mt-6 lg:mt-0">
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
@@ -169,7 +187,7 @@ export default function Listing() {
                       <div key={product.id}>
                         <div className="group relative">
                           <img
-                            alt={product.imageAlt}
+                            alt={product.title}
                             src={product.thumbnail}
                             className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
                           />
@@ -185,15 +203,16 @@ export default function Listing() {
                                 </Link>
                               </h3>
                               <p className="text-sm text-gray-500">
-                                {product.price}
+                                ${product.price}
                               </p>
                             </div>
                           </div>
                         </div>
 
+                        {/* Pass full product to addtocart */}
                         <button
                           type="button"
-                          onClick={() => addtocart(product.id)}
+                          onClick={() => addtocart(product)}
                           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  my-5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                         >
                           Add to cart
@@ -203,6 +222,8 @@ export default function Listing() {
               </div>
             </div>
           </div>
+
+          {/* Pagination */}
           <div className="flex justify-center mt-10">
             <nav aria-label="Page navigation example">
               <ul className="flex items-center -space-x-px h-10 text-base">
